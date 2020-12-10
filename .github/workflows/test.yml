@@ -1,0 +1,55 @@
+name: Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  test-check:
+    name: runner / ekko (github-check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          github_token: ${{ secrets.github_token }}
+          command: |-
+            echo "./action.yml:3:9: With a bit of help from action-template, no?"
+          errorformat: '%f:%l:%c: %m'
+          name: ekko
+          reporter: github-check
+          level: info
+
+  test-pr-check:
+    if: github.event_name == 'pull_request'
+    name: runner / ekko (github-pr-check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          github_token: ${{ secrets.github_token }}
+          command: |-
+            echo "./action.yml:3:9: With a bit of help from action-template, no?"
+          name: ekko
+          errorformat: '%f:%l:%c: %m' 
+          reporter: github-pr-check
+          level: warning
+          workdir: ./testdata/subdir/
+
+  test-pr-review:
+    if: github.event_name == 'pull_request'
+    name: runner / ekko (github-pr-review)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          github_token: ${{ secrets.github_token }}
+          command: |-
+            echo "./action.yml:3:9: With a bit of help from action-template, no?"
+          name: ekko
+          errorformat: '%f:%l:%c: %m' 
+          reporter: github-pr-review
+          level: error
+          reviewdog_flags: -filter-mode=file -fail-on-error
